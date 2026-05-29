@@ -1,0 +1,54 @@
+services:
+
+  auth-service:
+    build:
+      context: ./AuthServices/AuthService
+      dockerfile: Dockerfile
+    container_name: auth-service
+    ports:
+      - "5001:80"
+    environment:
+      - Jwt__Key=ThisIsMySecretKeyForJwtToken@12345!
+      - Jwt__Issuer=AuthService
+      - Jwt__Audience=EcommerceApp
+    networks:
+      - ecommerce-network
+
+  order-service:
+    build:
+      context: ./OrderService/OrderService
+      dockerfile: Dockerfile
+    container_name: order-service
+    ports:
+      - "5002:80"
+    environment:
+      - Jwt__Key=ThisIsMySecretKeyForJwtToken@12345!
+      - Jwt__Issuer=AuthService
+      - Jwt__Audience=EcommerceApp
+      - ConnectionStrings__DefaultConnection=Server=host.docker.internal,1433;Database=localdb;User Id=saa;Password=Test@123;TrustServerCertificate=True;
+    depends_on:
+      - auth-service
+    networks:
+      - ecommerce-network
+
+  api-gateway:
+    build:
+      context: ./ApiGateway/ApiGateway
+      dockerfile: Dockerfile
+    container_name: api-gateway
+    ports:
+      - "5007:80"
+    depends_on:
+      - auth-service
+      - order-service
+    networks:
+      - ecommerce-network
+
+networks:
+  ecommerce-network:
+    driver: bridge
+
+
+
+
+    
