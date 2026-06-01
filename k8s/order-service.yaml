@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: order-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: order-service
+  template:
+    metadata:
+      labels:
+        app: order-service
+    spec:
+      containers:
+      - name: order-service
+        image: sauravmicroservices.azurecr.io/order-service:v1
+        ports:
+        - containerPort: 80
+        env:
+        - name: Jwt__Key
+          value: "ThisIsMySecretKeyForJwtToken@12345!"
+        - name: Jwt__Issuer
+          value: "AuthService"
+        - name: Jwt__Audience
+          value: "EcommerceApp"
+        - name: ConnectionStrings__DefaultConnection
+          value: "Server=sauravorders2026.database.windows.net;Database=OrdersDB;User Id=sqladmin;Password=SqlPass@123456;TrustServerCertificate=True;Encrypt=True;"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: order-service
+spec:
+  selector:
+    app: order-service
+  ports:
+  - port: 80
+    targetPort: 80
+  type: ClusterIP

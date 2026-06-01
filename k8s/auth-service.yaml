@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: auth-service
+  template:
+    metadata:
+      labels:
+        app: auth-service
+    spec:
+      containers:
+      - name: auth-service
+        image: sauravmicroservices.azurecr.io/auth-service:v1
+        ports:
+        - containerPort: 80
+        env:
+        - name: Jwt__Key
+          value: "ThisIsMySecretKeyForJwtToken@12345!"
+        - name: Jwt__Issuer
+          value: "AuthService"
+        - name: Jwt__Audience
+          value: "EcommerceApp"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: auth-service
+spec:
+  selector:
+    app: auth-service
+  ports:
+  - port: 80
+    targetPort: 80
+  type: ClusterIP
